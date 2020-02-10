@@ -15,12 +15,12 @@ Install the following dependencies:
 # Second Step
 
 ```
-sudo adduser teamspeak --disabled-login
+sudo adduser teamspeak --disabled-login --uid 1111
 sudo setcap cap_sys_chroot+ep /usr/sbin/chroot 
 ```
 The second command is ONLY needed to run teamspeak as a server without root privileges.
 
-# Adding multiarch support for ARMV8
+# Adding multiarch support for ARMV8/AMD64
 
 Edit apt sources.
 
@@ -41,14 +41,14 @@ sudo apt update
 
 Create the base filesystem inside the directory of your preference.
 
-```qemu-debootstrap --arch amd64 xenial ts3vm```
+```qemu-debootstrap --arch amd64 xenial /home/teamspeak/ts3vm```
 
 This will perform all the neccesary steps as --first and --second-stage, and will
 copy qemu-x86_64-static to the VM meanwhile the process is taking time (and it will be around 20 minutes).
 
 It is neccesary to mount /dev/shm in the VM for this to work:
 
-```mount --bind /dev/shm /[PATH_TO]/ts3vm/dev/shm```
+```mount --bind /dev/shm /home/teamspeak/ts3vm/dev/shm```
 
 Download it to your Raspberry, and copy it to the vm /root folder with: 
 
@@ -64,7 +64,7 @@ chroot ts3vm
 Once you had chroot'ed into ts3vm , you should see something as the following on the terminal:
 
 ```
-root@ubuntu:/home/teamspeak# chroot tsvm/
+root@ubuntu:/home/teamspeak# chroot ts3vm/
 qemu-x86_64-static: warning: TCG doesn't support requested feature: CPUID.01H:ECX.vmx [bit 5]
 bash: warning: setlocale: LC_ALL: cannot change locale (xx_XX.UTF-8)
 qemu-x86_64-static: warning: TCG doesn't support requested feature: CPUID.01H:ECX.vmx [bit 5]
@@ -75,16 +75,22 @@ qemu-x86_64-static: warning: TCG doesn't support requested feature: CPUID.01H:EC
 root@ubuntu:/#
 ```
 
-Execute then the following commands_
+Execute then the following commands:
 
 ```
-adduser teamspeak --disabled-login
-cd /root/teamspeak3-server_linux_amd64/
+adduser teamspeak --disabled-login --uid 1111
+mv /root/teamspeak3-server_linux_amd64 /home/teamspeak
+cd /home/teamspeak/teamspeak3-server_linux_amd64
 touch .ts3server_license_accepted
 ./ts3server_minimal_runscript.sh
 ```
 
-Keep the track of the password and the token given in the output , you will need them later.
+Keep the track of the password and the token given in the output , you will need them later. You can see them also by doing
+
+```
+cat /home/teamspeak/ts3vm/home/teamspeak/teamspeak3-server_linux_amd64/logs/** | grep token
+```
+
 You have to make sure that user GUIDs of teamspeak user of both environments is the same to make it run 
 as non-root user.
 
