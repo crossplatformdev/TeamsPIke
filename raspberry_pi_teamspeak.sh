@@ -19,7 +19,7 @@ sudo setcap cap_sys_chroot+ep /usr/sbin/chroot
 
 # Add required repo for multiarch
 echo "--+ Adding multiarch support"
-sudo echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main multiverse restricted universe" > /etc/apt/sources.list.d/ubuntu_amd64.list
+echo "deb [arch=amd64] http://archive.ubuntu.com/ubuntu/ focal main multiverse restricted universe" | sudo tee /etc/apt/sources.list.d/ubuntu_amd64.list > /dev/null
 sudo dpkg --add-architecture amd64
 sudo apt update &>/dev/null
 
@@ -47,7 +47,7 @@ chown teamspeak:teamspeak /home/teamspeak/ts3vm/home/teamspeak -R
 
 echo "--+ Writing systemctl service file..."
 rm /lib/systemd/system/teamspeak.service &>/dev/null
-export TEMP_FILE=$(cat <<EOF
+TEMP_FILE=$(cat <<EOF
 
 [Unit]
 Description=TeamSpeak 3 Server in chroot environment
@@ -69,14 +69,14 @@ WantedBy=multi-user.target
 EOF
 )
 
-sudo echo "$TEMP_FILE" >> /lib/systemd/system/teamspeak.service
+echo "$TEMP_FILE" | sudo tee -a /lib/systemd/system/teamspeak.service > /dev/null
 sudo systemctl daemon-reload
 
 echo "--+ Starting server for the first time will take 10 minutes. Please be patient."
-kill -9 `pidof "/usr/bin/qemu-x86_64-static ./ts3server"`
+kill -9 "$(pidof "/usr/bin/qemu-x86_64-static ./ts3server")" 2>/dev/null || true
 chroot /home/teamspeak/ts3vm /bin/bash -c "./home/teamspeak/teamspeak3-server_linux_amd64/ts3server_minimal_runscript.sh" 2>/dev/null &
 sleep 600
-kill -9 `pidof "/usr/bin/qemu-x86_64-static ./ts3server"`
+kill -9 "$(pidof "/usr/bin/qemu-x86_64-static ./ts3server")" 2>/dev/null || true
 rm /home/teamspeak/ts3vm/home/teamspeak/teamspeak3-server_linux_amd64/ts3server.pid
 echo "##############################################################################################"
 echo "##############################################################################################"

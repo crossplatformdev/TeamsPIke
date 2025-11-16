@@ -1,0 +1,69 @@
+---
+name: CI - Test Script
+
+on:
+  push:
+    branches: [main, master, develop, copilot/**]
+  pull_request:
+    branches: [main, master, develop]
+
+permissions:
+  contents: read
+
+jobs:
+  shellcheck:
+    name: ShellCheck Lint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Run ShellCheck
+        uses: ludeeus/action-shellcheck@master
+        with:
+          scandir: '.'
+          severity: warning
+
+  syntax-check:
+    name: Bash Syntax Check
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify bash script syntax
+        run: |
+          echo "Checking syntax of bash scripts..."
+          bash -n raspberry_pi_teamspeak.sh
+          echo "✓ Syntax check passed"
+
+  script-validation:
+    name: Script Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Validate script is executable
+        run: |
+          echo "Checking if script has execute permissions..."
+          if [ -x raspberry_pi_teamspeak.sh ]; then
+            echo "✓ Script is executable"
+          else
+            echo "✗ Script is not executable"
+            exit 1
+          fi
+
+      - name: Validate shebang
+        run: |
+          echo "Checking shebang..."
+          first_line=$(head -n 1 raspberry_pi_teamspeak.sh)
+          if [[ "$first_line" == "#!/bin/bash"* ]]; then
+            echo "✓ Valid bash shebang found: $first_line"
+          else
+            echo "✗ Invalid or missing bash shebang"
+            exit 1
+          fi
