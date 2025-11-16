@@ -24,7 +24,7 @@ sudo dpkg --add-architecture amd64
 sudo apt update &>/dev/null
 
 echo "--+ Creating base filesistem . It may take a while, please be patient. Output is enabled."
-qemu-debootstrap --arch amd64 xenial /home/teamspeak/ts3vm
+qemu-debootstrap --arch amd64 $1 /home/teamspeak/ts3vm
 
 echo "--+ Mounting /dev/shm into chroot environment... (remember to edit fstab)"
 umount /home/teamspeak/ts3vm/dev/shm &>/dev/null
